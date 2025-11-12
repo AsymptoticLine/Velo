@@ -1,21 +1,22 @@
-use std::{env, fs, io::Result};
+use std::process::ExitCode;
+use std::{env, fs, io};
 
-use velo::models::{Dir, Rune, Vessel};
-use velo::sail::sail;
+use velo::models::{Rune, Vessel};
+use velo::sail::{Termination, sail};
 
-fn main() {
+fn main() -> ExitCode {
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 2 {
         eprintln!("Usage: {} [/path/to/code.velo]", args[0]);
-        return;
+        return ExitCode::FAILURE;
     }
 
     let path = &args[1];
     match load_velo_code(path) {
         Err(msg) => {
-            eprintln!("Failed to read file: {:}", msg);
-            return;
+            eprintln!("Failed to load velo file. {:}", msg);
+            ExitCode::FAILURE
         }
         Ok(raw_code) => {
             let code_lines = harmonize_runes(raw_code);
@@ -28,28 +29,27 @@ fn main() {
             let center_y = height / 2;
             let center_rune = cosmos[center_y][center_x];
 
-            let initial_dir = match center_rune {
-                Rune::ThrustUp => Dir::Up,
-                Rune::ThrustDown => Dir::Down,
-                Rune::ThrustLeft => Dir::Left,
-                Rune::ThrustRight => Dir::Right,
-                _ => {
-                    eprintln!(
-                        "The center rune is not Thrust(^v<>). Center ({:}, {:}) : {:?}",
-                        center_x, center_y, center_rune
-                    );
-                    return;
+            let vessel = Vessel::new(center_x, center_y, center_rune);
+
+            match sail(cosmos, vessel) {
+                Termination::Stopped => ExitCode::SUCCESS,
+                Termination::NoSignal => {
+                    eprintln!("The vessel traveled out of the cosmos.");
+                    ExitCode::FAILURE
                 }
-            };
-
-            let vessel = Vessel::new(center_x, center_y, initial_dir, 1);
-
-            sail(cosmos, vessel);
+                Termination::NoInitialVelocityOrDirection => {
+                    eprintln!(
+                        "Here was no Thrust rune at the center of the cosmos. CENTER: {{ x = {:}, y = {:}}}",
+                        center_x, center_y
+                    );
+                    ExitCode::FAILURE
+                }
+            }
         }
     }
 }
 
-fn load_velo_code(path: &str) -> Result<String> {
+fn load_velo_code(path: &str) -> io::Result<String> {
     let content = fs::read_to_string(path)?;
 
     Ok(content)

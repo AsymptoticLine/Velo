@@ -19,6 +19,7 @@ pub enum Dir {
     Down,
     Left,
     Right,
+    None,
 }
 
 #[derive(Debug)]
@@ -51,6 +52,7 @@ impl Dir {
             Dir::Down => Dir::Up,
             Dir::Left => Dir::Right,
             Dir::Right => Dir::Left,
+            Dir::None => Dir::None,
         }
     }
 
@@ -72,6 +74,7 @@ impl Dir {
             | (Dir::Right, Dir::Down)
             | (Dir::Down, Dir::Left)
             | (Dir::Left, Dir::Up) => Rotation::Right,
+            _ => Rotation::Stopped,
         }
     }
 }
@@ -85,7 +88,14 @@ pub struct Vessel {
 }
 
 impl Vessel {
-    pub fn new(x: usize, y: usize, dir: Dir, vel: i32) -> Vessel {
+    pub fn new(x: usize, y: usize, starting_rune: Rune) -> Vessel {
+        let (dir, vel) = match starting_rune {
+            Rune::ThrustUp => (Dir::Up, 1),
+            Rune::ThrustDown => (Dir::Down, 1),
+            Rune::ThrustLeft => (Dir::Left, 1),
+            Rune::ThrustRight => (Dir::Right, 1),
+            _ => (Dir::None, 0),
+        };
         Vessel { x, y, dir, vel }
     }
 
@@ -139,6 +149,7 @@ impl Vessel {
                 Ok((self.x - 1, self.y))
             }
             Dir::Right => Ok((self.x + 1, self.y)),
+            Dir::None => Err("No direction."),
         }
     }
 
