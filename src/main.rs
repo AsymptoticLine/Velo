@@ -56,6 +56,7 @@ fn load_velo_code(path: &str) -> io::Result<String> {
 }
 
 fn harmonize_runes(raw_code: String) -> Vec<String> {
+    // Harmonizes the raw Velo code into a standardized m x n odd-dimension cosmos.
     let lines: Vec<String> = raw_code.lines().map(|line| line.to_string()).collect();
 
     let code_width = lines.iter().map(|line| line.len()).max().unwrap_or(0);
@@ -78,10 +79,12 @@ fn harmonize_runes(raw_code: String) -> Vec<String> {
         if let Some(line) = lines.get(i) {
             let mut padded = line.clone();
             if padded.len() < width {
+                // Pad the line with ' ' (Void Runes) to meet the required width.
                 padded.push_str(&" ".repeat(width - padded.len()));
             }
             result.push(padded);
         } else {
+            // Pad new lines to meet the required height.
             result.push(" ".repeat(width));
         }
     }
@@ -102,10 +105,14 @@ fn char_to_rune(c: char) -> Rune {
         'v' => Rune::ThrustDown,
         '<' => Rune::ThrustLeft,
         '>' => Rune::ThrustRight,
-        '+' => Rune::Boost,
-        '-' => Rune::Brake,
         '*' => Rune::Star,
         'P' => Rune::Parking,
+        '+' => Rune::EntropyIncrease,
+        '-' => Rune::EntropyDecrease,
+        '[' => Rune::SteerLeft,
+        ']' => Rune::SteerRight,
+        ',' => Rune::Input,
+        '.' => Rune::Output,
         _ => Rune::Void,
     }
 }

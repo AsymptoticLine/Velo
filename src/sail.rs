@@ -2,7 +2,7 @@ use crate::models::{Cosmos, Vessel};
 
 /// Defines the reason for the Velo program's execution halt.
 pub enum Termination {
-    Stopped,                      // Vessel velocity reached zero.
+    Stopped,                      // Vessel velocity/pointer reached zero.
     NoSignal,                     // Vessel traveled out of the Cosmos bounds.
     NoInitialVelocityOrDirection, // Center Rune was not a Thrust rune.
 }
@@ -17,7 +17,7 @@ pub fn sail(cosmos: Cosmos, mut vessel: Vessel) -> Termination {
         return Termination::NoInitialVelocityOrDirection;
     }
 
-    // The execution loop: continues as long as the Vessel has speed.
+    // The execution loop: continues as long as the Velocity/Pointer is positive.
     while vessel.velocity() > 0 {
         if let Ok((x, y)) = vessel.get_next_coordinate() {
             // Check if the next coordinates are within the Cosmos boundaries.
@@ -30,24 +30,15 @@ pub fn sail(cosmos: Cosmos, mut vessel: Vessel) -> Termination {
             // Update the vessel's position.
             vessel.move_to(x, y);
 
-            /*
-            // Debug output: uncomment for tracing the Vessel's movement
-            let rotation =
-            // */
+            // Impact the Rune and execute the associated instruction/movement.
             vessel.impact_rune(rune);
 
             /*
-            println!(
-                "Vessel: {:?}. Rune: {:?}. Rotation: {:?}",
-                vessel, rune, rotation
-            );
+            // Debug output: prints the state of the vessel after impacting the rune.
+            println!("Vessel: {:?}. Rune: {:?}", vessel, rune);
             // */
-
-            // TODO: Implement the Velo code logic based on the rotation (Left/Right turns).
-            todo!("Add Velo code logic here.");
         } else {
-            // This is primarily an error if `direction` is `None` mid-sail (shouldn't happen)
-            // or if a boundary check failed in `get_next_coordinate`.
+            // This occurs if a boundary check failed in `get_next_coordinate` (e.g., trying to move from 0 to -1).
             return Termination::NoSignal;
         }
     }

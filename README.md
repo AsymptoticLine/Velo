@@ -1,63 +1,47 @@
-# 🚀 Velo: The Esoteric Programming Language of Cosmic Navigation
+# 🚀 Velo: The Esoteric Programming Language of Cosmic Velocity
 
-Velo is an experimental, work-in-progress Esoteric programming language (Esolang) centered around the concept of a **Vessel** (the program execution point) navigating a **Cosmos** (the Velo code). Program logic is executed based on the Vessel's speed and direction changes as it impacts various **Runes**.
+Velo is a **Turing-complete** Esolang where program execution is modeled as a **Vessel** navigating a **Cosmos**. The program's data and control flow are entirely determined by the Vessel's **Velocity** and **Entropy Level**.
 
-Velo is named after **Velocity**, the core concept of the execution model.
+The name Velo emphasizes **Velocity**, which serves a dual purpose:
+1.  **Physical Speed**: The actual rate of acceleration/deceleration.
+2.  **Program Pointer**: The value of Velocity acts as the **Cosmic Resonance Frequency**, indexing the data memory.
 
-## 🌌 How Velo Works
+## 🌌 Velo Cosmology and Execution
 
-### The Cosmos (Velo Code)
+### The Cosmos (The Code)
 
-The Velo code is represented as a grid, the **Cosmos**. The raw input code is harmonized into an $m \times n$ rectangular grid, where both $m$ and $n$ are forced to be odd numbers by padding with spaces (Void runes) to the right and bottom. This ensures a unique starting point at the center.
+Velo code is a 2D grid of Runes. It is harmonized into an $m \times n$ odd-dimension rectangle by padding with spaces (Void Runes). The Vessel always starts at the exact center.
 
 ### The Vessel (Program State)
 
-The program state is embodied by the `Vessel`, which has:
+The core state is stored within the Vessel:
+* **Velocity** (`usize`): The data pointer/frequency. The program halts if this value reaches 0.
+* **Data Lattice** (`Vec<i32>`): The expandable memory structure (Data Cells).
+* **Entropy Level** (`i32`): The value of the data cell currently pointed to by the Velocity.
 
-- **Coordinates** (`x`, `y`)
-- **Direction** (`Direction`)
-- **Velocity** (`i32`)
+### Execution
 
-The Vessel always starts at the exact center of the Cosmos. Its initial state is determined by the center Rune:
+The Vessel moves one unit per cycle based on its current direction. Program logic is executed when the Vessel impacts a Rune, modifying its Velocity, Direction, or the Entropy Level.
 
-- If the center Rune is a `Thrust` rune (`^`, `v`, `<`, `>`), the Vessel starts with a velocity of 1 and the corresponding direction.
-- Otherwise, the Vessel starts with no direction and zero velocity, causing the program to immediately terminate as it has no initial thrust.
+## 🔠 Rune Set (Instructions)
 
-### Runes (Instructions)
+Runes are grouped by their primary effect:
 
-Runes are characters in the Cosmos that modify the Vessel's state:
+| Rune | Name | Velo Field Affected | Effect |
+| :--- | :--- | :--- | :--- |
+| `^v<>` | **Thrust Runes** | Direction, Velocity | Modifies Velocity (+1, -1, or no change) and/or Direction based on the alignment of the Rune and the current direction. |
+| `P` | **Parking** | Velocity | Resets Velocity (Pointer) to 1. |
+| `*` | **Star** | Direction | Reverses the Vessel's direction. |
+| `+` | **Entropy Charge** | Entropy Level | Increases the current cell's Entropy Level by 1. |
+| `-` | **Entropy Drain** | Entropy Level | Decreases the current cell's Entropy Level by 1. |
+| `[` | **Steer Left** | Direction | **Conditional Loop:** If Entropy Level $\neq 0$, forces a 90° left turn, continuing the loop. |
+| `]` | **Steer Right** | Direction | **Conditional Loop:** If Entropy Level $\neq 0$, forces a 90° right turn, redirecting the Vessel. |
+| `,` | **Input** | Entropy Level | Reads a byte from stdin into the current cell. |
+| `.` | **Output** | N/A | Prints the current cell's Entropy Level as an ASCII character. |
 
-| Rune Character     | Rune Type | Effect on Vessel                                                                                                                                                     |
-| :----------------- | :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `^`, `v`, `<`, `>` | `Thrust`  | **Same Direction:** Velocity +1. **Opposite Direction:** Velocity -1. **Perpendicular Direction:** Direction changes to the Rune's direction, Velocity is unchanged. |
-| `+`                | `Boost`   | Velocity +1 (Direction unchanged).                                                                                                                                   |
-| `-`                | `Brake`   | Velocity -1 (Direction unchanged). If Velocity drops to 0, the program halts.                                                                                        |
-| `*`                | `Star`    | **Rebound:** Velocity unchanged, Direction reverses 180 degrees.                                                                                                     |
-| `P`                | `Parking` | Velocity becomes 1 (Direction unchanged).                                                                                                                            |
-| Other              | `Void`    | No effect on Velocity or Direction.                                                                                                                                  |
+## 🛑 Termination
 
-### Execution Flow
-
-The Vessel continuously moves in its current `Direction` by the amount of 1 unit per cycle.
-
-1.  Calculate the next coordinate based on current `Direction`.
-2.  Check for boundary conditions (if out of bounds, program halts: `NoSignal`).
-3.  The Vessel moves to the new coordinate and **impacts** the Rune.
-4.  The Rune modifies the Vessel's `Direction` and `Velocity`, returning a `Rotation` (Straight, Left, Right, UTurn, Stopped).
-5.  **Program Logic (TODO):** The `Rotation` value will be used to execute the underlying Velo instruction logic (e.g., a left turn might execute one type of instruction, and a right turn another).
-6.  The loop continues as long as `Velocity > 0`.
-
-## 🛠️ Project Structure
-
-- `src/main.rs`: Handles file loading, cosmos setup, Vessel initialization, and managing program termination.
-- `src/lib.rs`: Module exports.
-- `src/models.rs`: Defines core data structures: `Rune`, `Cosmos`, `Direction`, `Rotation`, and `Vessel`.
-- `src/sail.rs`: Contains the main execution logic (`sail` function), which iterates the Vessel's movement through the Cosmos.
-
-## 🚧 Next Steps (TODO)
-
-The main logical gap is the integration of the Esolang's instruction set:
-
-1.  **Implement Velo Code Logic:** The `Rotation` result in `src/sail.rs` needs to trigger the execution of Velo instructions (e.g., modifying an internal register or tape) based on Left/Right turns.
-2.  **Define and Implement State:** Add a program memory/tape/stack to the `Vessel` struct to hold the data the program manipulates.
-3.  **Output Mechanism:** Define how the final result of the program is printed or outputted.
+The Velo program halts if:
+1.  The **Velocity** (Pointer) reaches **0**.
+2.  The Vessel attempts to travel **out of the Cosmos boundaries** (NoSignal).
+3.  The Vessel starts on a Rune that is **not a Thrust Rune** (NoInitialVelocityOrDirection).
