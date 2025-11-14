@@ -189,7 +189,7 @@ pub struct Vessel {
 impl Vessel {
     /// Creates a new Vessel at the starting coordinates.
     pub fn new(x: usize, y: usize, starting_rune: Rune) -> Vessel {
-        // Initial direction and velocity are determined by the center Rune.
+        // Initial direction and velocity are determined by the top left corner Rune.
         let (direction, velocity) = match starting_rune {
             Rune::ThrustUp => (Direction::Up, 1),
             Rune::ThrustDown => (Direction::Down, 1),

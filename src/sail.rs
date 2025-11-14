@@ -4,7 +4,7 @@ use crate::models::{Cosmos, Vessel};
 pub enum Termination {
     Stopped,                      // Vessel velocity/pointer reached zero.
     NoSignal,                     // Vessel traveled out of the Cosmos bounds.
-    NoInitialVelocityOrDirection, // Center Rune was not a Thrust rune.
+    NoInitialVelocityOrDirection, // Start Rune was not a Thrust rune.
 }
 
 /// Runs the Velo program by moving the Vessel through the Cosmos grid.

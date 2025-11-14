@@ -23,13 +23,9 @@ fn main() -> ExitCode {
 
             let cosmos = materialize_runes(code_lines);
 
-            let width = cosmos[0].len();
-            let height = cosmos.len();
-            let center_x = width / 2;
-            let center_y = height / 2;
-            let center_rune = cosmos[center_y][center_x];
+            let start_rune = cosmos[0][0];
 
-            let vessel = Vessel::new(center_x, center_y, center_rune);
+            let vessel = Vessel::new(0, 0, start_rune);
 
             match sail(cosmos, vessel) {
                 Termination::Stopped => ExitCode::SUCCESS,
@@ -38,10 +34,7 @@ fn main() -> ExitCode {
                     ExitCode::FAILURE
                 }
                 Termination::NoInitialVelocityOrDirection => {
-                    eprintln!(
-                        "Here was no Thrust rune at the center of the cosmos. CENTER: {{ x = {:}, y = {:}}}",
-                        center_x, center_y
-                    );
+                    eprintln!("Here was no Thrust rune at the top left corner of the cosmos.");
                     ExitCode::FAILURE
                 }
             }
@@ -56,38 +49,23 @@ fn load_velo_code(path: &str) -> io::Result<String> {
 }
 
 fn harmonize_runes(raw_code: String) -> Vec<String> {
-    // Harmonizes the raw Velo code into a standardized m x n odd-dimension cosmos.
+    // Harmonizes the raw Velo code into a standardized m x n cosmos.
     let lines: Vec<String> = raw_code.lines().map(|line| line.to_string()).collect();
 
-    let code_width = lines.iter().map(|line| line.len()).max().unwrap_or(0);
-    let width = if code_width % 2 == 1 {
-        code_width
-    } else {
-        code_width + 1
-    };
+    let width = lines.iter().map(|line| line.len()).max().unwrap_or(0);
 
-    let code_height = lines.len();
-    let height = if code_height % 2 == 1 {
-        code_height
-    } else {
-        code_height + 1
-    };
+    let height = lines.len();
 
     let mut result = Vec::with_capacity(height);
 
-    for i in 0..height {
-        if let Some(line) = lines.get(i) {
-            let mut padded = line.clone();
-            if padded.len() < width {
-                // Pad the line with ' ' (Void Runes) to meet the required width.
-                padded.push_str(&" ".repeat(width - padded.len()));
-            }
-            result.push(padded);
-        } else {
-            // Pad new lines to meet the required height.
-            result.push(" ".repeat(width));
+    lines.iter().for_each(|line| {
+        let mut padded = line.clone();
+        if padded.len() < width {
+            // Pad the line with ' ' (Void Runes) to meet the required width.
+            padded.push_str(&" ".repeat(width - padded.len()));
         }
-    }
+        result.push(padded);
+    });
 
     result
 }
